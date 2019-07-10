@@ -3,13 +3,11 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 import numpy as np 
 import torch
 from torch.autograd import Variable
-from torchvision import datasets, transforms
 import torch.multiprocessing as mp 
 import operator
 from networks import ReplayBuffer, DeepDoubleSarsa, nstepDeepSarsa, nstepReplayBuffer
 import gym
-from skimage import color
-import cv2, random
+import random
 from collections import Counter
 
 
@@ -92,6 +90,8 @@ def gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20):
         obs = obs.to(device)
         qa = model1(obs)
         qb = model2(obs)
+        qa = np.squeeze(qa.cpu().data.numpy())
+        qb = np.squeeze(qb.cpu().data.numpy())
         a = gym_act(env, qa, qb, test_eps)
         t = 0
 
@@ -105,6 +105,8 @@ def gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20):
                 n_obs = n_obs.to(device)
                 n_qa = model1(n_obs)
                 n_qb = model2(n_obs)
+                n_qa = np.squeeze(n_qa.cpu().data.numpy())
+                n_qb = np.squeeze(n_qb.cpu().data.numpy())
                 an = gym_act(env, n_qa, n_qb, test_eps) 
                 a = an
                 obs1 = n_obs1
