@@ -281,7 +281,7 @@ class nstepDeepSarsa(torch.nn.Module):
         self.fc2 = torch.nn.Linear(64, 64, bias=bias)
         self.fc3 = torch.nn.Linear(64, exitus, bias=bias)
 
-        self.optimizer = torch.optim.SGD(self.parameters(), lr=lr)
+        self.optimizer = torch.optim.RMSprop(self.parameters(), lr=lr)
 
     def forward(self, input):
         x = input

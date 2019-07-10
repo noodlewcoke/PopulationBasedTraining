@@ -21,6 +21,8 @@ BUFFER_SIZE = 1000
 squeeze = 4
 target_update = 51
 N = 40
+BEST = 4
+WORST = 4
 
 ENV0 = 'MsPacman-ram-v0'
 ENV1 = 'Breakout-ram-v0'
@@ -64,7 +66,7 @@ def exploreIndividual(workerID, model1, model2, bestPerformers, worstPerformers,
         model1.save('models/sarsa/modelA{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
         model2.save('models/sarsa/modelB{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
 
-        train_acc[workerID] = gymEvaluate(workerID, model1, model2)
+        train_acc[workerID] = gymEvaluate(workerID, None, model1, model2)
 
 def gym_act(env, q1, q2, epsilon):
     if np.random.rand(1)[0] < epsilon:
@@ -73,7 +75,7 @@ def gym_act(env, q1, q2, epsilon):
         avg = [i+j for i,j in zip(q1 ,q2)]
         return np.argmax(np.array(avg))  
 
-def gymEvaluate(workerID, model1, model2, numEpisodes=20):
+def gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20):
     env = gym.make(ENV)
     obs_len = env.observation_space.shape[0]
     test_eps = 0.0
@@ -112,6 +114,8 @@ def gymEvaluate(workerID, model1, model2, numEpisodes=20):
     evalAvg = np.mean(rews)
     evalStd = np.std(rews)
     evalMax = max(rews)
+    if epoch:
+        np.save("evalRewsM{}E{}".format(workerID, epoch), np.array(rews))
     print("Evaluation  Model{}, total reward for {} episodes => max: {}, mean: {}, std: {}.".format(workerID, numEpisodes, evalMax, evalAvg, evalStd))
     # print("Evaluation average total reward for {} episodes: {}.".format(numEpisodes, evalAvgReward))
     # print("Evaluation maximum total reward: {}.".format(maxScore))
@@ -208,7 +212,7 @@ def pbtSarsa(workerID, model1, model2, device, eps, train_return, target=False):
     # model2.save('models/sarsa/modelB{}'.format(workerID))
 
 
-def pbtnstepSarsa(workerID, model1, model2, device, eps, train_return, target=False):
+def pbtnstepSarsa(workerID, model1, model2, device, eps, epoch, train_return, target=False):
     act_len = 9 #! Breakout: 4 | MsPackman: 9
     env = gym.make(ENV)
     env.seed(random.randint(0, 999999))
@@ -320,7 +324,7 @@ def pbtnstepSarsa(workerID, model1, model2, device, eps, train_return, target=Fa
     model2.save('models/sarsa/modelB{}'.format(workerID))
     
     print("Model {} training max score: {}".format(workerID, max_score))
-    avgEvalScore = gymEvaluate(workerID, model1, model2, numEpisodes=20)
+    avgEvalScore = gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20)
     print("Model {} evaluation average score: {}".format(workerID, avgEvalScore))
     train_return[workerID] = avgEvalScore
     # train_return[workerID] = max_score
@@ -334,6 +338,7 @@ def pbtRun(method):
         act_len = 4
     eps = 1.0
     lrs = list(np.arange(0.001, 0.1, 0.005))
+    # lrs = [0.001, 0.005, 0.01]
     num_processes = len(lrs)
     ddsarsas = []
     targets = []
@@ -376,7 +381,7 @@ def pbtRun(method):
             if method == "vanilla":
                 p = mp.Process(target=pbtSarsa, args=(rank, ddsarsas[rank], targets[rank], device, eps, train_return, False))
             elif method == "nstep":
-                p = mp.Process(target=pbtnstepSarsa, args=(rank, ddsarsas[rank], targets[rank], device, eps, train_return, False))
+                p = mp.Process(target=pbtnstepSarsa, args=(rank, ddsarsas[rank], targets[rank], device, eps, e, train_return, False))
 
             p.start()
             processes.append(p)
@@ -387,7 +392,7 @@ def pbtRun(method):
         for p in processes: p.join()
 
         print("\nEpoch {} - Exploration/Exploitation Sequences\n".format(e))
-        bestPerformers, worstPerformers = exploitPopulation(train_return, best=4, worst= 4)
+        bestPerformers, worstPerformers = exploitPopulation(train_return, best=BEST, worst=WORST)
         processes = []
 
         for rank in range(num_processes):
