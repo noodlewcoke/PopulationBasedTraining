@@ -376,6 +376,7 @@ def pbtRun(method):
     for e in range(1, EPOCH+1):
         processes = []
         # p = mp.Pool(num_processes)
+        start = time.time()
 
         for rank in range(num_processes):
             if method == "vanilla":
@@ -400,7 +401,11 @@ def pbtRun(method):
             p2.start()
             processes.append(p2)
         for p2 in processes: p2.join()
-        
+        stop = time.time()
+        elapsedTime = stop - start
+        leftTime = elapsedTime * (EPOCH - e - 1)
+        print("Time spent on this epoch: {} mins {} secs".format(elapsedTime//60, elapsedTime%60))
+        print("Expected time left for completion: {} mins {} sec".format(leftTime//60, leftTime%60))
         eps -= EPISODES*(epsilon_start - epsilon_stop)/epsilon_decay
     #* Save best model at the end
     for bestPerformer in bestPerformers:
