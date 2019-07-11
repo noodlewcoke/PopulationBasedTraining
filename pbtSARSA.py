@@ -52,8 +52,8 @@ def exploreIndividual(workerID, model1, model2, bestPerformers, worstPerformers,
     bestPerformer = random.choice(bestPerformers)
     
     if workerID in worstPerformers:
-        model1.load('models/sarsa/modelA{}'.format(bestPerformer)) #! Async behavior forces to load a file which is being saved.
-        model2.load('models/sarsa/modelB{}'.format(bestPerformer))
+        model1.load('modelA{}'.format(bestPerformer)) #! Async behavior forces to load a file which is being saved.
+        model2.load('modelB{}'.format(bestPerformer))
         print("Model {} is changed to Model {}".format(workerID, bestPerformer))
 
         #? Perturbation sequence
@@ -61,8 +61,8 @@ def exploreIndividual(workerID, model1, model2, bestPerformers, worstPerformers,
         model1.perturb(workerID, seed)
         model2.perturb(workerID, seed)
 
-        model1.save('models/sarsa/modelA{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
-        model2.save('models/sarsa/modelB{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
+        model1.save('modelA{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
+        model2.save('modelB{}'.format(workerID)) #* Save method saves both weights and optimizer hyperparameters
 
         train_acc[workerID] = gymEvaluate(workerID, None, model1, model2)
 
@@ -106,7 +106,7 @@ def gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20):
                 n_qa = model1(n_obs)
                 n_qb = model2(n_obs)
                 n_qa = np.squeeze(n_qa.cpu().data.numpy())
-                n_qb = np.squeeze(n_qb.cpu().data.numpy())
+                n_qb = np.squeeze(n_qb.cpu().data.numpy())  
                 an = gym_act(env, n_qa, n_qb, test_eps) 
                 a = an
                 obs1 = n_obs1
@@ -322,8 +322,8 @@ def pbtnstepSarsa(workerID, model1, model2, device, eps, epoch, train_return, ta
         if not e%10:
             print("Model {} Episode {} Max score: {}     Eps: {}".format(workerID, e, max_score, epsilon))
             # #! Test max training
-    model1.save('models/sarsa/modelA{}'.format(workerID))
-    model2.save('models/sarsa/modelB{}'.format(workerID))
+    model1.save('modelA{}'.format(workerID))
+    model2.save('modelB{}'.format(workerID))
     
     print("Model {} training max score: {}".format(workerID, max_score))
     avgEvalScore = gymEvaluate(workerID, epoch, model1, model2, numEpisodes=20)
@@ -412,8 +412,8 @@ def pbtRun(method):
     #* Save best model at the end
     for bestPerformer in bestPerformers:
         print("\nSaving best performer: Model {}.".format(bestPerformer))
-        ddsarsas[bestPerformer].save("models/sarsa/bestPerformerA{}".format(bestPerformer))
-        targets[bestPerformer].save("models/sarsa/bestPerformerB{}".format(bestPerformer))
+        ddsarsas[bestPerformer].save("bestPerformerA{}".format(bestPerformer))
+        targets[bestPerformer].save("bestPerformerB{}".format(bestPerformer))
 
 
 if __name__ == "__main__":

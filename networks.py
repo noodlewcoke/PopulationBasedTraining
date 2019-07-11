@@ -330,7 +330,7 @@ class nstepDeepSarsa(torch.nn.Module):
     def perturb(self, worker, seed):
         np.random.seed(seed)
         for _,v in self.state_dict().items():
-            v += Variable(torch.FloatTensor(np.random.normal(0.0, 0.001, size = v.shape))).cuda()
+            v += Variable(torch.FloatTensor(np.random.normal(0.0, 0.001, size = v.shape))).cpu()
 
         #* Hyperparameter update
         lrChange = max(0.001, np.random.normal(0.0, 0.01))
