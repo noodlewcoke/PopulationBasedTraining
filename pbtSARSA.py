@@ -339,7 +339,7 @@ def pbtRun(method):
     elif ENV == ENV1:
         act_len = 4
     eps = 1.0
-    lrs = list(np.arange(0.001, 0.1, 0.005))
+    lrs = list(np.arange(0.001, 0.1, 0.007))
     # lrs = [0.001, 0.005, 0.01]
     num_processes = len(lrs)
     ddsarsas = []
