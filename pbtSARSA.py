@@ -13,7 +13,7 @@ from collections import Counter
 
 epsilon_start, epsilon_stop, epsilon_decay = 1.0, 0.1, 9000
 EPOCH = 20
-EPISODES = 500
+EPISODES = 10
 BATCH_SIZE = 64
 BUFFER_SIZE = 1000
 squeeze = 4
