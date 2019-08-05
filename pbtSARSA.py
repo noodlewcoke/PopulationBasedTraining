@@ -13,7 +13,7 @@ from collections import Counter
 
 epsilon_start, epsilon_stop, epsilon_decay = 1.0, 0.1, 9000
 EPOCH = 20
-EPISODES = 500
+EPISODES = 10
 BATCH_SIZE = 64
 BUFFER_SIZE = 1000
 squeeze = 4
@@ -339,7 +339,7 @@ def pbtRun(method):
     elif ENV == ENV1:
         act_len = 4
     eps = 1.0
-    lrs = list(np.arange(0.001, 0.1, 0.005))
+    lrs = list(np.arange(0.001, 0.1, 0.007))
     # lrs = [0.001, 0.005, 0.01]
     num_processes = len(lrs)
     ddsarsas = []
